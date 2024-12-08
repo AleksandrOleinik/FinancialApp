@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,23 +31,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AppNavigator()
+            val incomeViewModel: IncomeViewModel = viewModel()
+            AppNavigator(incomeViewModel)
         }
     }
 }
 
 
-@Preview(showBackground = true)
+
 @Composable
-fun AppNavigator() {
-    val mockNavController = rememberNavController() // Mock NavController
-    NavHost(navController = mockNavController, startDestination = "dashboard") {
-        composable("dashboard") { FinancialDashboard(mockNavController) } // Dashboard Screen
-        composable("details") {  DetailsScreen(mockNavController)  }                     // Details Screen
+fun AppNavigator(incomeViewModel: IncomeViewModel) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "dashboard") {
+        composable("dashboard") { FinancialDashboard(navController) }
+        composable("details") {  DetailsScreen(navController)  }
+        composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
     }
 }
-
-
 
 
 @Composable //this is just for testing changing routes. will be replaced for correct route
