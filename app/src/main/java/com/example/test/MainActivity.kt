@@ -19,6 +19,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 
 class MainActivity : ComponentActivity() {
@@ -26,115 +30,50 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
+            AppNavigator()
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
-fun FinancialDashboardPreview() {
-    FinancialDashboard()
+fun AppNavigator() {
+    val mockNavController = rememberNavController() // Mock NavController
+    NavHost(navController = mockNavController, startDestination = "dashboard") {
+        composable("dashboard") { FinancialDashboard(mockNavController) } // Dashboard Screen
+        composable("details") {  DetailsScreen(mockNavController)  }                     // Details Screen
+    }
 }
 
 
-@Composable
-fun FinancialDashboard() {
+
+
+@Composable //this is just for testing changing routes. will be replaced for correct route
+fun DetailsScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEFEFEF))
-            .padding(16.dp)
+            .background(Color.White),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            HeaderSection()
-            ButtonList()
-            AddExpenseButton()
+            Text(
+                text = "This is the Details Page",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { navController.navigateUp() }) {
+                Text(text = "Go Back")
+            }
         }
     }
 }
 
-@Composable
-fun HeaderSection() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.home),
-            contentDescription = "Home",
-            modifier = Modifier.size(32.dp),
-            tint = Color.Black
-        )
-        Text(
-            text = "The one who walks\nwill master the road",
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.user),
-            contentDescription = "Profile",
-            modifier = Modifier.size(32.dp),
-            tint = Color.Black
-        )
-    }
-}
 
-@Composable
-fun ButtonList() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        DashboardButton(text = "Income", backgroundColor = Color(0xFFB4D881))
-        DashboardButton(text = "Expenses", backgroundColor = Color(0xFFF4A261))
-        DashboardButton(text = "Budget", backgroundColor = Color(0xFF82B4E3))
-        DashboardButton(text = "Investments", backgroundColor = Color(0xFFB4D881))
-    }
-}
-
-@Composable
-fun DashboardButton(text: String, backgroundColor: Color) {
-    Button(
-        onClick = { /* TODO: Add navigation or action */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .border(width = 2.dp, color = Color.Black, shape = MaterialTheme.shapes.extraLarge),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor)
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-    }
-}
-
-@Composable
-fun AddExpenseButton() {
-    Button(
-        onClick = { /* TODO: Add action */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-            .border(width = 2.dp, color = Color.Black, shape = MaterialTheme.shapes.extraLarge),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4A261))
-    ) {
-        Text(
-            text = "Add Expense",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-    }
-}
 
