@@ -45,6 +45,7 @@ fun AppNavigator(incomeViewModel: IncomeViewModel) {
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") { FinancialDashboard(navController) }
         composable("details") {  DetailsScreen(navController)  }
+        composable("budget") { BudgetPage() }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
     }
 }
