@@ -15,10 +15,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 
 @Composable
-fun BudgetPage() {
+fun BudgetPage(navController: NavHostController) {
     val categories = listOf("Housing", "Food", "Savings", "Other", "Fun")
     val colors = listOf(Color(0xFF78C257), Color(0xFFB5E48C), Color(0xFFE9FF70), Color(0xFFFFC107), Color(0xFFFFA726))
     val increment = 100
@@ -34,7 +35,7 @@ fun BudgetPage() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        HeaderSection()
+        HeaderSection(navController = navController)
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally

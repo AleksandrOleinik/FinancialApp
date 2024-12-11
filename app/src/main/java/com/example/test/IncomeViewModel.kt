@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData
 
 
 class IncomeViewModel : ViewModel() {
-    private val repository = IncomeRepository()
 
+    private val repository = IncomeRepository()
     private val _incomeList = MutableLiveData<List<Income>>()
     val incomeList: LiveData<List<Income>> get() = _incomeList
 
@@ -17,6 +17,7 @@ class IncomeViewModel : ViewModel() {
     init{
         loadIncome()
     }
+
     fun loadIncome() {
 
         _incomeList.value = emptyList()

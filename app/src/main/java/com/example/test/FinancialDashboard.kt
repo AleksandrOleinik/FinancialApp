@@ -36,7 +36,7 @@ fun FinancialDashboard(navController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            HeaderSection()
+            HeaderSection(navController = navController)
             ButtonList(navController)
             AddExpenseButton()
         }

@@ -17,8 +17,8 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
-    val incomeList = viewModel.incomeList.observeAsState(emptyList())
 
+    val incomeList = viewModel.incomeList.observeAsState(emptyList())
     val itemsPerPage = 5
     val totalPages = (incomeList.value.size + itemsPerPage - 1) / itemsPerPage
     var currentPage by remember { mutableStateOf(0) }
@@ -37,7 +37,7 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
             verticalArrangement = Arrangement.Top
 
         ) {
-            HeaderSection()
+            HeaderSection(navController = navController)
             LineChartScreen(incomeData = incomeList.value)
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -26,7 +26,7 @@ import androidx.navigation.compose.rememberNavController
 
 
 @Composable
-fun HeaderSection() {
+fun HeaderSection(navController: NavHostController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -35,7 +35,9 @@ fun HeaderSection() {
         Icon(
             painter = painterResource(id = R.drawable.home),
             contentDescription = "Home",
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier
+                .size(32.dp)
+                .clickable { navController.navigateUp() },
             tint = Color.Black
         )
         Text(
