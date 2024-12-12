@@ -29,8 +29,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val incomeRepository = IncomeRepository()
+            val expenseRepository = ExpenseRepository()
             val incomeViewModel: IncomeViewModel = viewModel(factory = IncomeViewModelFactory(incomeRepository))
-            AppNavigator(incomeViewModel)
+            val expenseViewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(expenseRepository))
+
+            AppNavigator(
+                incomeViewModel,
+                expenseViewModel
+            )
         }
     }
 }
@@ -38,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppNavigator(incomeViewModel: IncomeViewModel) {
+fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseViewModel) {
     val navController = rememberNavController()
     val budgetRepository = remember { BudgetRepository() }
     val budgetViewModelFactory = remember { BudgetViewModelFactory(budgetRepository) }
@@ -51,6 +57,8 @@ fun AppNavigator(incomeViewModel: IncomeViewModel) {
             BudgetPage(navController = navController, viewModel = budgetViewModel)
         }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
+        composable("expenses") { ExpensesPage(viewModel = expenseViewModel, navController = navController) }
+
     }
 }
 

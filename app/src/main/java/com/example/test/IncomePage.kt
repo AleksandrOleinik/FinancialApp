@@ -34,7 +34,14 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
             verticalArrangement = Arrangement.Top
         ) {
             HeaderSection(navController = navController)
-            LineChartScreen(incomeData = incomeList)
+            LineChartScreen(
+                data = incomeList.map {
+                    Pair(it.date.format(DateTimeFormatter.ofPattern("MM/yy")), it.amount.toFloat())
+                },
+                label = "Income",
+                lineColor = android.graphics.Color.GREEN
+            )
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

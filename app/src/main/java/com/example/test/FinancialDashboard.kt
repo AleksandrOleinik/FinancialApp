@@ -47,7 +47,7 @@ fun ButtonList(navController: NavHostController) {
         DashboardButton(
             text = "Expenses",
             backgroundColor = Color(0xFFF4A261),
-            onClick = { navController.navigate("details") }
+            onClick = { navController.navigate("expenses") }
         )
         DashboardButton(
             text = "Budget",
