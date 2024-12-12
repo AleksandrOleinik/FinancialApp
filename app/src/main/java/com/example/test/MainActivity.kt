@@ -5,20 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,7 +28,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val incomeViewModel: IncomeViewModel = viewModel()
+            val incomeRepository = IncomeRepository()
+            val incomeViewModel: IncomeViewModel = viewModel(factory = IncomeViewModelFactory(incomeRepository))
             AppNavigator(incomeViewModel)
         }
     }
@@ -42,10 +40,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigator(incomeViewModel: IncomeViewModel) {
     val navController = rememberNavController()
+    val budgetRepository = remember { BudgetRepository() }
+    val budgetViewModelFactory = remember { BudgetViewModelFactory(budgetRepository) }
+
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") { FinancialDashboard(navController) }
         composable("details") {  DetailsScreen(navController)  }
-        composable("budget") { BudgetPage(navController) }
+        composable("budget") {
+            val budgetViewModel = viewModel<BudgetViewModel>(factory = budgetViewModelFactory)
+            BudgetPage(navController = navController, viewModel = budgetViewModel)
+        }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
     }
 }

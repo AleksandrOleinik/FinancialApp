@@ -1,34 +1,30 @@
 
 package com.example.test
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
+class IncomeViewModel(private val repository: IncomeRepository) : ViewModel() {
 
-class IncomeViewModel : ViewModel() {
+    private val _incomeList = MutableStateFlow<List<Income>>(emptyList())
+    val incomeList: StateFlow<List<Income>> = _incomeList
 
-    private val repository = IncomeRepository()
-    private val _incomeList = MutableLiveData<List<Income>>()
-    val incomeList: LiveData<List<Income>> get() = _incomeList
-
-
-    init{
+    init {
         loadIncome()
     }
 
-    fun loadIncome() {
-
-        _incomeList.value = emptyList()
-        _incomeList.value = repository.getAllIncome().toList()
+    private fun loadIncome() {
+        _incomeList.value = repository.getAllIncome()
     }
 
     fun addIncome(income: Income) {
-        repository.addIncome(income)
-        loadIncome()
-
-        Log.d("IncomeDebug", "Income List = ${_incomeList.value}")
-
+        viewModelScope.launch {
+            repository.addIncome(income)
+            _incomeList.value = repository.getAllIncome()
+        }
     }
 }
+

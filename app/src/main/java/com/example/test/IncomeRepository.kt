@@ -8,7 +8,7 @@ class IncomeRepository {
 
 
     fun getAllIncome(): List<Income> {
-        return incomesList
+        return incomesList.toList()
     }
 
     fun addIncome(income: Income) {

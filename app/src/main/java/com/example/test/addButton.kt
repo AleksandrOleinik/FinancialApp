@@ -52,10 +52,9 @@ fun AddButton(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(onClick = {
-                    // Pass the income object back to the parent
                     onSubmit(
                         Income(
-                            id = 0, // Parent should handle unique IDs
+                            id = 0,
                             date = LocalDate.parse(dateInput, DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                             amount = amountInput.toDoubleOrNull() ?: 0.0,
                             cur = currencyInput
@@ -67,7 +66,7 @@ fun AddButton(
                 }
 
                 Button(onClick = {
-                    // Reset the state
+
                     isAddingIncome = false
                     dateInput = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     amountInput = ""
