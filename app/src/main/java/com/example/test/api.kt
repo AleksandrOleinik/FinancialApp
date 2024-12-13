@@ -10,16 +10,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 data class OpenCloseResponse(
+    val status: String,
+    val from: String,
     val symbol: String,
     val open: Double,
-    val close: Double,
     val high: Double,
     val low: Double,
+    val close: Double,
     val volume: Long,
     val afterHours: Double?,
-    val preMarket: Double?,
-    val from: String
+    val preMarket: Double?
 )
+
 
 interface PolygonApi {
     @GET("v1/open-close/{symbol}/{date}")

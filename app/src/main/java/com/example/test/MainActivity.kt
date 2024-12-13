@@ -32,10 +32,11 @@ class MainActivity : ComponentActivity() {
             val expenseRepository = ExpenseRepository()
             val incomeViewModel: IncomeViewModel = viewModel(factory = IncomeViewModelFactory(incomeRepository))
             val expenseViewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(expenseRepository))
-
+            val investViewModel: InvestViewModel = viewModel()
             AppNavigator(
                 incomeViewModel,
-                expenseViewModel
+                expenseViewModel,
+                investViewModel
             )
 
         }
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseViewModel) {
+fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseViewModel,investViewModel: InvestViewModel) {
     val navController = rememberNavController()
     val budgetRepository = remember { BudgetRepository() }
     val budgetViewModelFactory = remember { BudgetViewModelFactory(budgetRepository) }
@@ -59,6 +60,9 @@ fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseView
         }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
         composable("expenses") { ExpensesPage(viewModel = expenseViewModel, navController = navController) }
+        composable("invest") {
+            InvestPage(viewModel = investViewModel)
+        }
 
     }
 }
