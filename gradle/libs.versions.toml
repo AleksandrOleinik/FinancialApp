@@ -30,7 +30,10 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version = "3.1.0" }
-
+polygon-io = { group = "com.github.polygon-io", name = "client-jvm", version = "v5.1.2" }
+dotenv = { group = "io.github.cdimascio", name = "dotenv-kotlin", version = "6.4.1" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version = "2.9.0" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "2.9.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

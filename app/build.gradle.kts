@@ -39,8 +39,12 @@ android {
     }
 }
 
-dependencies {
 
+
+
+dependencies {
+    implementation(libs.dotenv)
+    implementation(libs.polygon.io)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,4 +66,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.mpandroidchart)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 }
