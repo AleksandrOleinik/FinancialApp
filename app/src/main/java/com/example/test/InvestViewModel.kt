@@ -5,41 +5,59 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
-import com.example.test.BuildConfig
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 class InvestViewModel : ViewModel() {
 
-    private val _response = mutableStateOf<OpenCloseResponse?>(null)
-    val response: State<OpenCloseResponse?> = _response
+    private val repository = InvestmentRepository()
 
+    val investments: StateFlow<List<InvestEntry>> = repository.investments
 
-    private val _errorMessage = mutableStateOf<String?>(null)
-    val errorMessage: State<String?> = _errorMessage
-
-
+    private val apiKey = BuildConfig.API_KEY
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.polygon.io/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-
     private val polygonApi = retrofit.create(PolygonApi::class.java)
 
 
-    private val apiKey = BuildConfig.API_KEY
-
-
-    fun fetchDailyOpenClose(symbol: String, date: String) {
+    fun fetchAndUpdatePrice(ticker: String, type: String, boughtAt: Double) {
+        println("Fetching price for $type")
         viewModelScope.launch {
-            try {
-                val apiResponse = polygonApi.getDailyOpenClose(symbol, date, apiKey)
-                _response.value = apiResponse
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-                println("Error: ${e.message}")
+            val newPrice: Double
+            if (type.equals("Crypto", ignoreCase = true) || type.equals("Stock", ignoreCase = true)) {
+                try {
+
+                    val adjustedTicker = if (type.equals("Crypto", ignoreCase = true)) {
+                        "X:${ticker.uppercase()}USD"
+                    } else {
+                        ticker.uppercase()
+                    }
+
+                    val yesterday = LocalDate.now().minusDays(1)
+                    val dateString = yesterday.format(DateTimeFormatter.ISO_DATE)
+
+                    val apiResponse = polygonApi.getDailyOpenClose(adjustedTicker, dateString, apiKey)
+                    newPrice = apiResponse.close
+                    println("apiResponse: $apiResponse")
+
+                    repository.updateInvestmentPrice(ticker, newPrice)
+                } catch (e: Exception) {
+                    println("Error fetching price for $ticker: ${e.message}")
+                }
+            } else {
+                newPrice = boughtAt
+                repository.updateInvestmentPrice(ticker, newPrice)
             }
         }
+    }
+
+
+
+    fun addInvestment(entry: InvestEntry) {
+        repository.addInvestment(entry)
     }
 }
