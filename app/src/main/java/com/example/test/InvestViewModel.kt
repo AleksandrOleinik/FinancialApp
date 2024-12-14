@@ -60,4 +60,9 @@ class InvestViewModel : ViewModel() {
     fun addInvestment(entry: InvestEntry) {
         repository.addInvestment(entry)
     }
+    fun deleteInvestment(entry: InvestEntry) {
+        repository.deleteInvestment(entry)
+    }
+
+
 }

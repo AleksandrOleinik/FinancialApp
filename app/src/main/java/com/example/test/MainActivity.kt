@@ -61,7 +61,7 @@ fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseView
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
         composable("expenses") { ExpensesPage(viewModel = expenseViewModel, navController = navController) }
         composable("invest") {
-            InvestPage(viewModel = investViewModel)
+            InvestPage(viewModel = investViewModel, navController = navController)
         }
 
     }

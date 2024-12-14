@@ -5,31 +5,60 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+
 @Composable
-fun InvestPage(viewModel: InvestViewModel = viewModel()) {
+fun InvestPage(viewModel: InvestViewModel = viewModel(),navController: NavHostController) {
     val investments by viewModel.investments.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Investments", style = MaterialTheme.typography.titleLarge)
 
-        investments.forEach { entry ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(entry.type, modifier = Modifier.weight(1f))
-                Text(entry.ticker, modifier = Modifier.weight(1f))
-                Text(entry.boughtAt.toString(), modifier = Modifier.weight(1f))
-                Text(entry.amount.toString(), modifier = Modifier.weight(1f))
-                Text(entry.price.toString(), modifier = Modifier.weight(1f))
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            HeaderSection(navController = navController)
+            Row(modifier=Modifier.padding(12.dp),horizontalArrangement = Arrangement.SpaceBetween,){
+                Text("Type", modifier = Modifier.weight(2f))
+                Text("Ticker", modifier = Modifier.weight(2f))
+                Text("Bought at", modifier = Modifier.weight(2f))
+                Text("Amount", modifier = Modifier.weight(2f))
+                Text("Current Price", modifier = Modifier.weight(2f))
+                Text("              ", modifier = Modifier.weight(2f))
+
+            }
+
+            investments.forEach { entry ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(entry.type, modifier = Modifier.weight(1f))
+                    Text(entry.ticker, modifier = Modifier.weight(1f))
+                    Text(entry.boughtAt.toString(), modifier = Modifier.weight(1f))
+                    Text(entry.amount.toString(), modifier = Modifier.weight(1f))
+                    Text(entry.price.toString(), modifier = Modifier.weight(1f))
+
+                    IconButton(
+                        onClick = { viewModel.deleteInvestment(entry) },
+                        modifier = Modifier.size(16.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.minus),
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
-
+        Column(){
 
         var ticker by remember { mutableStateOf("") }
         var boughtAt by remember { mutableStateOf("") }
@@ -72,7 +101,10 @@ fun InvestPage(viewModel: InvestViewModel = viewModel()) {
                 )
             }
         }
-
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ){
         Button(onClick = {
             viewModel.addInvestment(
                 InvestEntry(
@@ -90,8 +122,10 @@ fun InvestPage(viewModel: InvestViewModel = viewModel()) {
             investments.forEach { viewModel.fetchAndUpdatePrice(it.ticker, it.type, it.boughtAt) }
         }) {
             Text("Update Prices")
-        }
+        }}
     }
+        }
+
 }
 
 
@@ -119,7 +153,6 @@ fun DropdownMenuExample(selectedType: String, onTypeSelected: (String) -> Unit) 
                 .menuAnchor()
         )
 
-        // Dropdown menu
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }

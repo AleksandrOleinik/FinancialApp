@@ -17,4 +17,9 @@ class InvestmentRepository {
             if (it.ticker == ticker) it.copy(price = newPrice) else it
         }
     }
+
+    fun deleteInvestment(entry: InvestEntry) {
+        _investments.value = _investments.value.filter { it != entry }
+    }
+
 }
