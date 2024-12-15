@@ -28,44 +28,58 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val incomeRepository = IncomeRepository()
-            val expenseRepository = ExpenseRepository()
+
+            val database = AppDatabase.getInstance(this)
+            val incomeDao = database.incomeDao()
+            val expenseDao = database.expenseDao()
+            val budgetDao = database.budgetDao()
+            val investmentDao = database.investmentDao()
+
+            val incomeRepository = IncomeRepository(incomeDao)
+            val expenseRepository = ExpenseRepository(expenseDao)
+            val budgetRepository = BudgetRepository(budgetDao)
+            val investmentRepository = InvestmentRepository(investmentDao)
+
             val incomeViewModel: IncomeViewModel = viewModel(factory = IncomeViewModelFactory(incomeRepository))
             val expenseViewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(expenseRepository))
-            val investViewModel: InvestViewModel = viewModel()
-            AppNavigator(
-                incomeViewModel,
-                expenseViewModel,
-                investViewModel
-            )
+            val investViewModel: InvestViewModel = viewModel(factory = InvestViewModelFactory(investmentRepository))
+            val budgetViewModel: BudgetViewModel = viewModel(factory = BudgetViewModelFactory(budgetRepository))
 
+            // Pass ViewModels to the App Navigator
+            AppNavigator(
+                incomeViewModel = incomeViewModel,
+                expenseViewModel = expenseViewModel,
+                investViewModel = investViewModel,
+                budgetViewModel = budgetViewModel
+            )
         }
     }
 }
 
 
-
 @Composable
-fun AppNavigator(incomeViewModel: IncomeViewModel, expenseViewModel: ExpenseViewModel,investViewModel: InvestViewModel) {
+fun AppNavigator(
+    incomeViewModel: IncomeViewModel,
+    expenseViewModel: ExpenseViewModel,
+    investViewModel: InvestViewModel,
+    budgetViewModel: BudgetViewModel
+) {
     val navController = rememberNavController()
-    val budgetRepository = remember { BudgetRepository() }
-    val budgetViewModelFactory = remember { BudgetViewModelFactory(budgetRepository) }
 
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") { FinancialDashboard(navController) }
-        composable("details") {  DetailsScreen(navController)  }
+        composable("details") { DetailsScreen(navController) }
         composable("budget") {
-            val budgetViewModel = viewModel<BudgetViewModel>(factory = budgetViewModelFactory)
-            BudgetPage(navController = navController, viewModel = budgetViewModel)
+            BudgetPage(navController = navController, viewModel = budgetViewModel) // Use the existing budgetViewModel
         }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
         composable("expenses") { ExpensesPage(viewModel = expenseViewModel, navController = navController) }
         composable("invest") {
             InvestPage(viewModel = investViewModel, navController = navController)
         }
-
     }
 }
+
 
 
 @Composable //this is just for testing changing routes. will be replaced for correct route

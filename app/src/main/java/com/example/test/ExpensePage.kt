@@ -39,7 +39,7 @@ fun ExpensesPage(viewModel: ExpenseViewModel, navController: NavHostController) 
                     Pair(it.date.format(DateTimeFormatter.ofPattern("MM/yy")), it.amount.toFloat())
                 },
                 label = "Expenses",
-                lineColor = android.graphics.Color.parseColor("#F4A261")
+                lineColor = android.graphics.Color.RED
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -52,9 +52,13 @@ fun ExpensesPage(viewModel: ExpenseViewModel, navController: NavHostController) 
                 StyledItem(
                     Date = expense.date.format(DateTimeFormatter.ofPattern("MM/yy")),
                     curr = expense.cur,
-                    amount = expense.amount.toString()
+                    amount = expense.amount.toString(),
+                    onDelete = {
+                        viewModel.deleteExpense(expense.id)
+                    }
                 )
             }
+
         }
         Column(
             modifier = Modifier.fillMaxWidth(),

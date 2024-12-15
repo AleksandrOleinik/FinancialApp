@@ -1,66 +1,81 @@
 package com.example.test
 
-import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.*
-
-
+import kotlinx.coroutines.launch
 class BudgetViewModel(private val repository: BudgetRepository) : ViewModel() {
+    private val _budgets = MutableStateFlow<List<Budget>>(emptyList())
+    val budgets: StateFlow<List<Budget>> = _budgets
 
-    private val _income = MutableStateFlow(repository.getIncome())
-    val income: StateFlow<Int> = _income.asStateFlow()
+    private val _totalBudget = MutableStateFlow(0)
+    val totalBudget: StateFlow<Int> = _totalBudget
 
-    private val _budgetValues = MutableStateFlow(repository.getBudgetValues())
-    val budgetValues: StateFlow<List<Int>> = _budgetValues.asStateFlow()
-
-    val totalBudget: StateFlow<Int> = combine(_income, _budgetValues) { income, budget ->
-        income - budget.sum()
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        repository.getIncome() - repository.getBudgetValues().sum()
-    )
-
-    val categories: List<String> = listOf("Housing", "Food", "Savings", "Other", "Fun")
-
-    val colors: List<Color> = listOf(
-        Color(0xFF78C257),
-        Color(0xFFB5E48C),
-        Color(0xFFE9FF70),
-        Color(0xFFFFC107),
-        Color(0xFFFFA726)
-    )
-
-    fun increaseIncome(amount: Int) {
-        val newIncome = _income.value + amount
-        repository.setIncome(newIncome)
-        _income.value = newIncome
-    }
-
-    fun decreaseIncome(amount: Int) {
-        val newIncome = _income.value - amount
-        if (newIncome >= _budgetValues.value.sum()) {
-            repository.setIncome(newIncome)
-            _income.value = newIncome
+    init {
+        viewModelScope.launch {
+            repository.ensureDefaultBudget() // Ensure the default budget exists
+            loadBudgets()
         }
     }
 
-    fun increaseExpense(index: Int, amount: Int) {
-        val updatedBudget = _budgetValues.value.toMutableList().apply { this[index] += amount }
-        repository.updateBudgetValue(index, updatedBudget[index])
-        _budgetValues.value = updatedBudget
+    private suspend fun loadBudgets() {
+        val budgetList = repository.getAllBudgets()
+        _budgets.value = budgetList
+
+        // Calculate "Left" as Income - Sum of All Expenses
+        val income = budgetList.find { it.category == "Income" }?.amount ?: 0
+        val expenses = budgetList.filter { it.category != "Income" }.sumOf { it.amount }
+        _totalBudget.value = income - expenses
     }
 
-    fun decreaseExpense(index: Int, amount: Int) {
-        val updatedBudget = _budgetValues.value.toMutableList().apply {
-            if (this[index] > 0) this[index] -= amount
+    fun increaseExpense(category: String, amount: Int) {
+        viewModelScope.launch {
+            if (category == "Income") {
+                updateIncome(amount)
+            } else {
+                updateBudget(category, amount)
+            }
         }
-        repository.updateBudgetValue(index, updatedBudget[index])
-        _budgetValues.value = updatedBudget
+    }
+
+    fun decreaseExpense(category: String, amount: Int) {
+        viewModelScope.launch {
+            if (category == "Income") {
+                updateIncome(-amount)
+            } else {
+                updateBudget(category, -amount)
+            }
+        }
+    }
+
+    private suspend fun updateIncome(amountChange: Int) {
+        val budgetList = repository.getAllBudgets() // Always fetch the latest data
+        val incomeBudget = budgetList.find { it.category == "Income" }
+        if (incomeBudget != null) {
+            val updatedIncome = incomeBudget.copy(amount = incomeBudget.amount + amountChange)
+            repository.insertBudget(updatedIncome) // Persist updated income
+        } else {
+            // Add Income if it does not exist
+            repository.insertBudget(Budget(category = "Income", amount = amountChange))
+        }
+        loadBudgets() // Reload to reflect changes
+    }
+
+    private suspend fun updateBudget(category: String, amountChange: Int) {
+        val budgetList = repository.getAllBudgets() // Always fetch the latest data
+        val budgetToUpdate = budgetList.find { it.category == category }
+        if (budgetToUpdate != null) {
+            val updatedBudget = budgetToUpdate.copy(amount = budgetToUpdate.amount + amountChange)
+            repository.insertBudget(updatedBudget) // Persist updated budget
+        }
+        loadBudgets() // Reload to reflect changes
+    }
+
+    fun resetBudgets() {
+        viewModelScope.launch {
+            repository.resetBudgets()
+            loadBudgets()
+        }
     }
 }

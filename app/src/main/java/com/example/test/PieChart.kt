@@ -46,8 +46,10 @@ fun PieChart(
                     y,
                     android.graphics.Paint().apply {
                         color = android.graphics.Color.BLACK
-                        textSize = 24f
+                        textSize = 48f
                         textAlign = android.graphics.Paint.Align.CENTER
+                        typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+
                     }
                 )
             }

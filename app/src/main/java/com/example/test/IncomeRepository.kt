@@ -1,18 +1,25 @@
 package com.example.test
-import java.time.LocalDate
 
-class IncomeRepository {
-    private val incomesList = mutableListOf(
-            Income(1, LocalDate.of(2023, 10, 12), 5000.0, "USD"),
-            Income(2, LocalDate.of(2023, 11, 13), 3000.0, "USD"))
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
+class IncomeRepository(private val incomeDao: IncomeDao) {
 
-    fun getAllIncome(): List<Income> {
-        return incomesList.toList()
+    suspend fun getAllIncome(): List<Income> {
+        return withContext(Dispatchers.IO) {
+            incomeDao.getAllIncomes()
+        }
     }
 
-    fun addIncome(income: Income) {
-            incomesList.add(income)
+    suspend fun addIncome(income: Income) {
+        withContext(Dispatchers.IO) {
+            incomeDao.insertIncome(income)
+        }
     }
 
+    suspend fun deleteIncome(incomeId: Int) {
+        withContext(Dispatchers.IO) {
+            incomeDao.deleteIncome(incomeId)
+        }
+    }
 }

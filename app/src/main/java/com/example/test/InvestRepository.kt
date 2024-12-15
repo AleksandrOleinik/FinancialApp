@@ -1,25 +1,34 @@
 package com.example.test
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 
-class InvestmentRepository {
+class InvestmentRepository(private val investmentDao: InvestmentDao) {
 
-    private val _investments = MutableStateFlow<List<InvestEntry>>(emptyList())
-    val investments: StateFlow<List<InvestEntry>> = _investments
+    val investments: Flow<List<Investment>> = investmentDao.getAllInvestments()
 
-    fun addInvestment(entry: InvestEntry) {
-        _investments.value = _investments.value + entry
+    suspend fun addInvestment(investment: Investment) {
+        investmentDao.insertInvestment(investment)
     }
 
-    fun updateInvestmentPrice(ticker: String, newPrice: Double) {
-        _investments.value = _investments.value.map {
-            if (it.ticker == ticker) it.copy(price = newPrice) else it
+    suspend fun updateInvestmentPrice(ticker: String, newPrice: Double) {
+        val investmentList = investmentDao.getAllInvestments().firstOrNull()
+        val investment = investmentList?.find { it.ticker == ticker }
+        if (investment != null) {
+            val updatedInvestment = investment.copy(price = newPrice)
+            investmentDao.updateInvestment(updatedInvestment)
         }
     }
 
-    fun deleteInvestment(entry: InvestEntry) {
-        _investments.value = _investments.value.filter { it != entry }
+    suspend fun deleteInvestmentByTicker(ticker: String) {
+        val investmentList = investmentDao.getAllInvestments().firstOrNull()
+        val investment = investmentList?.find { it.ticker == ticker }
+        if (investment != null) {
+            investmentDao.deleteInvestmentById(investment.id)
+        }
     }
 
+    suspend fun clearInvestments() {
+        investmentDao.deleteAll()
+    }
 }

@@ -2,19 +2,32 @@ package com.example.test
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.DayOfWeek
 
+class InvestViewModel(private val repository: InvestmentRepository) : ViewModel() {
 
-class InvestViewModel : ViewModel() {
-
-    private val repository = InvestmentRepository()
-
+    // Observing the investments from the repository
     val investments: StateFlow<List<InvestEntry>> = repository.investments
+        .map { investments ->
+            investments.map { investment ->
+                InvestEntry(
+                    type = investment.type,
+                    ticker = investment.ticker,
+                    boughtAt = investment.boughtAt,
+                    amount = investment.amount,
+                    price = investment.price
+                )
+            }
+        }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Lazily, emptyList())
 
     private val apiKey = BuildConfig.API_KEY
     private val retrofit = Retrofit.Builder()
@@ -23,27 +36,28 @@ class InvestViewModel : ViewModel() {
         .build()
     private val polygonApi = retrofit.create(PolygonApi::class.java)
 
-
+    // Fetches and updates the current price for a given ticker
     fun fetchAndUpdatePrice(ticker: String, type: String, boughtAt: Double) {
         println("Fetching price for $type")
         viewModelScope.launch {
             val newPrice: Double
             if (type.equals("Crypto", ignoreCase = true) || type.equals("Stock", ignoreCase = true)) {
                 try {
-
                     val adjustedTicker = if (type.equals("Crypto", ignoreCase = true)) {
                         "X:${ticker.uppercase()}USD"
                     } else {
                         ticker.uppercase()
                     }
 
-                    val yesterday = LocalDate.now().minusDays(1)
-                    val dateString = yesterday.format(DateTimeFormatter.ISO_DATE)
-
+                    val lastBusinessDay = getLastBusinessDay()
+                    val dateString = lastBusinessDay.format(DateTimeFormatter.ISO_DATE)
+                    println("Ticker: $adjustedTicker")
+                    println("Date: $dateString")
                     val apiResponse = polygonApi.getDailyOpenClose(adjustedTicker, dateString, apiKey)
                     newPrice = apiResponse.close
                     println("apiResponse: $apiResponse")
 
+                    // Update the price in the database
                     repository.updateInvestmentPrice(ticker, newPrice)
                 } catch (e: Exception) {
                     println("Error fetching price for $ticker: ${e.message}")
@@ -55,14 +69,40 @@ class InvestViewModel : ViewModel() {
         }
     }
 
-
-
+    // Adds a new investment entry
     fun addInvestment(entry: InvestEntry) {
-        repository.addInvestment(entry)
+        viewModelScope.launch {
+            val investment = Investment(
+                type = entry.type,
+                ticker = entry.ticker,
+                boughtAt = entry.boughtAt,
+                amount = entry.amount,
+                price = entry.price
+            )
+            repository.addInvestment(investment)
+        }
     }
+
+    // Deletes an investment entry
     fun deleteInvestment(entry: InvestEntry) {
-        repository.deleteInvestment(entry)
+        viewModelScope.launch {
+            repository.deleteInvestmentByTicker(entry.ticker)
+        }
     }
 
+    // Deletes all investments (optional utility function)
+    fun clearAllInvestments() {
+        viewModelScope.launch {
+            repository.clearInvestments()
+        }
+    }
+    fun getLastBusinessDay(): LocalDate {
+        var date = LocalDate.now().minusDays(1) // Start with yesterday
 
+        // Adjust the date if it's a weekend
+        while (date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY) {
+            date = date.minusDays(1) // Go back one day
+        }
+        return date
+    }
 }

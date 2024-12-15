@@ -28,7 +28,7 @@ fun FinancialDashboard(navController: NavHostController) {
         ) {
             HeaderSection(navController = navController)
             ButtonList(navController)
-            AddExpenseButton()
+            ExportCsvButton(context = navController.context, database = AppDatabase.getInstance(navController.context))
         }
     }
 }
@@ -82,21 +82,3 @@ fun DashboardButton(text: String, backgroundColor: Color, onClick: () -> Unit) {
 }
 
 
-@Composable
-fun AddExpenseButton() {
-    Button(
-        onClick = { /* TODO: Add action */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
-            .border(width = 2.dp, color = Color.Black, shape = MaterialTheme.shapes.extraLarge),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4A261))
-    ) {
-        Text(
-            text = "Add Expense",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-    }
-}

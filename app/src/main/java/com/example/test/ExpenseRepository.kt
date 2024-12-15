@@ -1,18 +1,25 @@
 package com.example.test
 
-import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class ExpenseRepository {
-    private val expensesList = mutableListOf(
-        Expense(1, LocalDate.of(2023, 10, 12), 200.0, "USD"),
-        Expense(2, LocalDate.of(2023, 11, 13), 150.0, "USD")
-    )
+class ExpenseRepository(private val expenseDao: ExpenseDao) {
 
-    fun getAllExpenses(): List<Expense> {
-        return expensesList.toList()
+    suspend fun getAllExpenses(): List<Expense> {
+        return withContext(Dispatchers.IO) {
+            expenseDao.getAllExpenses()
+        }
     }
 
-    fun addExpense(expense: Expense) {
-        expensesList.add(expense)
+    suspend fun addExpense(expense: Expense) {
+        withContext(Dispatchers.IO) {
+            expenseDao.insertExpense(expense)
+        }
+    }
+
+    suspend fun deleteExpense(expenseId: Int) {
+        withContext(Dispatchers.IO) {
+            expenseDao.deleteExpense(expenseId)
+        }
     }
 }

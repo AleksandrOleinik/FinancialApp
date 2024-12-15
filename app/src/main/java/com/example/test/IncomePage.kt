@@ -42,7 +42,6 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
                 lineColor = android.graphics.Color.GREEN
             )
 
-
             Spacer(modifier = Modifier.height(16.dp))
 
             val startIndex = currentPage * itemsPerPage
@@ -53,49 +52,51 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
                 StyledItem(
                     Date = income.date.format(DateTimeFormatter.ofPattern("MM/yy")),
                     curr = income.cur,
-                    amount = income.amount.toString()
+                    amount = income.amount.toString(),
+                    onDelete = {
+                        viewModel.deleteIncome(income.id)
+                    }
                 )
             }
+
         }
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = { if (currentPage > 0) currentPage-- },
-                enabled = currentPage > 0
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Previous")
+                Button(
+                    onClick = { if (currentPage > 0) currentPage-- },
+                    enabled = currentPage > 0
+                ) {
+                    Text("Previous")
+                }
+
+                Button(
+                    onClick = { if (currentPage < totalPages - 1) currentPage++ },
+                    enabled = currentPage < totalPages - 1
+                ) {
+                    Text("Next")
+                }
             }
 
-            //Text("Page ${currentPage + 1} of $totalPages")
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = { if (currentPage < totalPages - 1) currentPage++ },
-                enabled = currentPage < totalPages - 1
-            ) {
-                Text("Next")
+            AddButton(
+                onSubmit = { newIncome ->
+                    viewModel.addIncome(newIncome)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { navController.navigateUp() }) {
+                Text(text = "Go Back")
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        AddButton(
-            onSubmit = { newIncome ->
-                viewModel.addIncome(newIncome)
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { navController.navigateUp() }) {
-            Text(text = "Go Back")
-        }
         }
     }
 }

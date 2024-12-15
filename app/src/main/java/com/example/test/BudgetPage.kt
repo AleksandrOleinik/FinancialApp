@@ -2,55 +2,63 @@ package com.example.test
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-
-
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun BudgetPage(
     navController: NavHostController,
-    viewModel: BudgetViewModel = viewModel(factory = BudgetViewModelFactory(BudgetRepository()))
+    viewModel: BudgetViewModel = viewModel(factory = BudgetViewModelFactory(BudgetRepository(AppDatabase.getInstance(navController.context).budgetDao())))
 ) {
-    val income = viewModel.income.collectAsState()
-    val budgetValues = viewModel.budgetValues.collectAsState()
-    val totalBudget = viewModel.totalBudget.collectAsState()
+    val budgets by viewModel.budgets.collectAsState()
+    val totalBudget by viewModel.totalBudget.collectAsState()
 
     BudgetPageContent(
         navController = navController,
-        income = income.value,
-        budgetValues = budgetValues.value,
-        totalBudget = totalBudget.value,
-        categories = viewModel.categories,
-        colors = viewModel.colors,
-        viewModel = viewModel
+        budgets = budgets,
+        totalBudget = totalBudget,
+        onIncrease = { category -> viewModel.increaseExpense(category, 100) },
+        onDecrease = { category -> viewModel.decreaseExpense(category, 100) },
+        onIncomeIncrease = { viewModel.increaseExpense("Income", 100) },
+        onIncomeDecrease = { viewModel.decreaseExpense("Income", 100) },
+        onReset = { viewModel.resetBudgets() }
     )
 }
-
 @Composable
 fun BudgetPageContent(
     navController: NavHostController,
-    income: Int,
-    budgetValues: List<Int>,
+    budgets: List<Budget>,
     totalBudget: Int,
-    categories: List<String>,
-    colors: List<Color>,
-    viewModel: BudgetViewModel
+    onIncrease: (String) -> Unit,
+    onDecrease: (String) -> Unit,
+    onIncomeIncrease: () -> Unit,
+    onIncomeDecrease: () -> Unit,
+    onReset: () -> Unit
 ) {
-    val increment = 100
+    val income = budgets.find { it.category == "Income" }?.amount ?: 0
+    val expenses = budgets.filter { it.category != "Income" }
+
+    // Calculate the remaining budget
+    val remainingBudget = totalBudget
+
+    // Prepare the data for the pie chart
+    val pieChartData = expenses.map { it.amount.toFloat() } + remainingBudget.toFloat()
+    val pieChartLabels = expenses.map { it.category } + "Left"
+    val pieChartColors = listOf(
+        Color(0xFF78C257), Color(0xFFB5E48C), Color(0xFFFFC107),
+        Color(0xFFFFA726), Color(0xFFE9FF70), Color.Gray
+    )
 
     Column(
         modifier = Modifier
@@ -59,58 +67,78 @@ fun BudgetPageContent(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Header
         HeaderSection(navController = navController)
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        // PieChart
+        PieChart(
+            data = pieChartData,
+            colors = pieChartColors,
+            labels = pieChartLabels,
+            modifier = Modifier
+                .height(250.dp)
+                .padding(vertical = 8.dp)
+                .width(250.dp)
+        )
+
+        // Income Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF4CAF50), RoundedCornerShape(20.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            PieChart(
-                data = budgetValues.map { it.toFloat() } + totalBudget.toFloat(),
-                colors = colors + listOf(Color.Gray),
-                labels = categories + listOf("Left"),
-                modifier = Modifier.size(200.dp)
+            IconButton(onClick = onIncomeDecrease) {
+                Icon(
+                    painterResource(id = R.drawable.minus),
+                    contentDescription = "Decrease Income",
+                    tint = Color.White
+                )
+            }
+            Text(
+                text = "Income: $income $",
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
             )
+            IconButton(onClick = onIncomeIncrease) {
+                Icon(
+                    painterResource(id = R.drawable.plus),
+                    contentDescription = "Increase Income",
+                    tint = Color.White
+                )
+            }
         }
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        // Expense Rows
+        expenses.forEach { budget ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF78C257), RoundedCornerShape(20.dp))
-                    .border(2.dp, Color.Black, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .background(Color(0xFFFFC107), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { viewModel.decreaseIncome(increment) },
-                    modifier = Modifier.size(20.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.minus),
-                        contentDescription = "Decrease Income"
+                IconButton(onClick = { onDecrease(budget.category) }) {
+                    Icon(
+                        painterResource(id = R.drawable.minus),
+                        contentDescription = "Decrease Expense",
+                        tint = Color.Black
                     )
                 }
-
                 Text(
-                    text = "Income: $income $",
-                    color = Color.Black,
+                    text = "${budget.category}: ${budget.amount} $",
                     fontSize = 16.sp,
-                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
-
-                IconButton(
-                    onClick = { viewModel.increaseIncome(increment) },
-                    modifier = Modifier.size(20.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.plus),
-                        contentDescription = "Increase Income"
+                IconButton(onClick = { onIncrease(budget.category) }) {
+                    Icon(
+                        painterResource(id = R.drawable.plus),
+                        contentDescription = "Increase Expense",
+                        tint = Color.Black
                     )
                 }
             }
@@ -118,65 +146,31 @@ fun BudgetPageContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            categories.forEachIndexed { index, category ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colors[index], RoundedCornerShape(20.dp))
-                        .border(2.dp, Color.Black, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(
-                        onClick = { viewModel.decreaseExpense(index, increment) },
-                        modifier = Modifier.size(20.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.minus),
-                            contentDescription = "Decrease Expense"
-                        )
-                    }
-
-                    Text(
-                        text = "$category: ${budgetValues[index]} $",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
-                    )
-
-                    IconButton(
-                        onClick = { viewModel.increaseExpense(index, increment) },
-                        modifier = Modifier.size(20.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.plus),
-                            contentDescription = "Increase Expense"
-                        )
-                    }
-                }
-            }
-        }
+        // Total Left
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF78C257), RoundedCornerShape(20.dp))
-                .border(2.dp, Color.Black, RoundedCornerShape(20.dp))
+                .background(Color(0xFF4CAF50), RoundedCornerShape(20.dp))
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Left: $totalBudget $",
                 color = Color.White,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
+        }
+
+        // Reset Button
+        Button(
+            onClick = onReset,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            Text("Reset Budgets")
         }
     }
 }
+

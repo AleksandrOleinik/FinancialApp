@@ -1,25 +1,50 @@
 package com.example.test
 
-class BudgetRepository {
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-    private var income: Int = 5000
-    private var budgetValues: MutableList<Int> = mutableListOf(1000, 1000, 1000, 1000, 1000)
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-    fun getIncome(): Int {
-        return income
+@Entity(tableName = "budgets")
+data class Budget(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val category: String,
+    val amount: Int
+)
+
+class BudgetRepository(private val budgetDao: BudgetDao) {
+    suspend fun getAllBudgets(): List<Budget> {
+        return withContext(Dispatchers.IO) {
+            budgetDao.getAllBudgets()
+        }
     }
 
-    fun setIncome(newIncome: Int) {
-        income = newIncome
+    suspend fun insertBudget(budget: Budget) {
+        withContext(Dispatchers.IO) {
+            budgetDao.insertBudget(budget)
+        }
     }
 
-    fun getBudgetValues(): List<Int> {
-        return budgetValues.toList()
+    suspend fun ensureDefaultBudget() {
+        withContext(Dispatchers.IO) {
+            if (budgetDao.getAllBudgets().isEmpty()) {
+                // Add Income and Expense categories
+                budgetDao.insertBudget(Budget(category = "Income", amount = 5000))
+                budgetDao.insertBudget(Budget(category = "Housing", amount = 1000))
+                budgetDao.insertBudget(Budget(category = "Food", amount = 1000))
+                budgetDao.insertBudget(Budget(category = "Savings", amount = 1000))
+                budgetDao.insertBudget(Budget(category = "Other", amount = 1000))
+                budgetDao.insertBudget(Budget(category = "Fun", amount = 1000))
+            }
+        }
     }
 
-    fun updateBudgetValue(index: Int, newValue: Int) {
-        if (index in budgetValues.indices) {
-            budgetValues[index] = newValue
+    suspend fun resetBudgets() {
+        withContext(Dispatchers.IO) {
+            budgetDao.resetBudgets()
+            ensureDefaultBudget() // Reset includes adding defaults
         }
     }
 }
+

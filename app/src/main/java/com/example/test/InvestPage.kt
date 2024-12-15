@@ -29,7 +29,7 @@ fun InvestPage(viewModel: InvestViewModel = viewModel(),navController: NavHostCo
                 Text("Bought at", modifier = Modifier.weight(2f))
                 Text("Amount", modifier = Modifier.weight(2f))
                 Text("Current Price", modifier = Modifier.weight(2f))
-                Text("              ", modifier = Modifier.weight(2f))
+
 
             }
 

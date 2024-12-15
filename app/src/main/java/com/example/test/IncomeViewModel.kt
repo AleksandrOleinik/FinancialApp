@@ -1,4 +1,3 @@
-
 package com.example.test
 
 import androidx.lifecycle.ViewModel
@@ -13,18 +12,26 @@ class IncomeViewModel(private val repository: IncomeRepository) : ViewModel() {
     val incomeList: StateFlow<List<Income>> = _incomeList
 
     init {
-        loadIncome()
+        loadIncomes()
     }
 
-    private fun loadIncome() {
-        _incomeList.value = repository.getAllIncome()
+    private fun loadIncomes() {
+        viewModelScope.launch {
+            _incomeList.value = repository.getAllIncome()
+        }
     }
 
     fun addIncome(income: Income) {
         viewModelScope.launch {
             repository.addIncome(income)
-            _incomeList.value = repository.getAllIncome()
+            loadIncomes() // Reload incomes after adding a new one
+        }
+    }
+
+    fun deleteIncome(incomeId: Int) {
+        viewModelScope.launch {
+            repository.deleteIncome(incomeId)
+            loadIncomes() // Reload incomes after deletion
         }
     }
 }
-
