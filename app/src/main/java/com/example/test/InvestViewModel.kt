@@ -14,7 +14,7 @@ import java.time.DayOfWeek
 
 class InvestViewModel(private val repository: InvestmentRepository) : ViewModel() {
 
-    // Observing the investments from the repository
+
     val investments: StateFlow<List<InvestEntry>> = repository.investments
         .map { investments ->
             investments.map { investment ->
@@ -36,7 +36,7 @@ class InvestViewModel(private val repository: InvestmentRepository) : ViewModel(
         .build()
     private val polygonApi = retrofit.create(PolygonApi::class.java)
 
-    // Fetches and updates the current price for a given ticker
+
     fun fetchAndUpdatePrice(ticker: String, type: String, boughtAt: Double) {
         println("Fetching price for $type")
         viewModelScope.launch {
@@ -57,7 +57,7 @@ class InvestViewModel(private val repository: InvestmentRepository) : ViewModel(
                     newPrice = apiResponse.close
                     println("apiResponse: $apiResponse")
 
-                    // Update the price in the database
+
                     repository.updateInvestmentPrice(ticker, newPrice)
                 } catch (e: Exception) {
                     println("Error fetching price for $ticker: ${e.message}")
@@ -69,7 +69,7 @@ class InvestViewModel(private val repository: InvestmentRepository) : ViewModel(
         }
     }
 
-    // Adds a new investment entry
+
     fun addInvestment(entry: InvestEntry) {
         viewModelScope.launch {
             val investment = Investment(
@@ -83,25 +83,19 @@ class InvestViewModel(private val repository: InvestmentRepository) : ViewModel(
         }
     }
 
-    // Deletes an investment entry
+
     fun deleteInvestment(entry: InvestEntry) {
         viewModelScope.launch {
             repository.deleteInvestmentByTicker(entry.ticker)
         }
     }
 
-    // Deletes all investments (optional utility function)
-    fun clearAllInvestments() {
-        viewModelScope.launch {
-            repository.clearInvestments()
-        }
-    }
     fun getLastBusinessDay(): LocalDate {
-        var date = LocalDate.now().minusDays(1) // Start with yesterday
+        var date = LocalDate.now().minusDays(1)
 
-        // Adjust the date if it's a weekend
+
         while (date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY) {
-            date = date.minusDays(1) // Go back one day
+            date = date.minusDays(1)
         }
         return date
     }

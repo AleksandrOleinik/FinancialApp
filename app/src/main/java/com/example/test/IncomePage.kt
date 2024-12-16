@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import java.time.format.DateTimeFormatter
@@ -70,14 +71,16 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
             ) {
                 Button(
                     onClick = { if (currentPage > 0) currentPage-- },
-                    enabled = currentPage > 0
+                    enabled = currentPage > 0,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF227C9D))
                 ) {
                     Text("Previous")
                 }
 
                 Button(
                     onClick = { if (currentPage < totalPages - 1) currentPage++ },
-                    enabled = currentPage < totalPages - 1
+                    enabled = currentPage < totalPages - 1,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF227C9D))
                 ) {
                     Text("Next")
                 }
@@ -94,7 +97,8 @@ fun IncomePage(viewModel: IncomeViewModel, navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { navController.navigateUp() }) {
+            Button(onClick = { navController.navigateUp() },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF227C9D))) {
                 Text(text = "Go Back")
             }
         }

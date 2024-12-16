@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
             val investViewModel: InvestViewModel = viewModel(factory = InvestViewModelFactory(investmentRepository))
             val budgetViewModel: BudgetViewModel = viewModel(factory = BudgetViewModelFactory(budgetRepository))
 
-            // Pass ViewModels to the App Navigator
             AppNavigator(
                 incomeViewModel = incomeViewModel,
                 expenseViewModel = expenseViewModel,
@@ -70,7 +69,7 @@ fun AppNavigator(
         composable("dashboard") { FinancialDashboard(navController) }
         composable("details") { DetailsScreen(navController) }
         composable("budget") {
-            BudgetPage(navController = navController, viewModel = budgetViewModel) // Use the existing budgetViewModel
+            BudgetPage(navController = navController, viewModel = budgetViewModel)
         }
         composable("income") { IncomePage(viewModel = incomeViewModel, navController = navController) }
         composable("expenses") { ExpensesPage(viewModel = expenseViewModel, navController = navController) }

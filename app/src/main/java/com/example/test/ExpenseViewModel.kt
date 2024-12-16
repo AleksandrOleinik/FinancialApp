@@ -24,14 +24,14 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     fun addExpense(expense: Expense) {
         viewModelScope.launch {
             repository.addExpense(expense)
-            loadExpenses() // Reload expenses after adding a new one
+            loadExpenses()
         }
     }
 
     fun deleteExpense(expenseId: Int) {
         viewModelScope.launch {
             repository.deleteExpense(expenseId)
-            loadExpenses() // Reload expenses after deletion
+            loadExpenses()
         }
     }
 }

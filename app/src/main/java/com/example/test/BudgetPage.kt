@@ -49,10 +49,10 @@ fun BudgetPageContent(
     val income = budgets.find { it.category == "Income" }?.amount ?: 0
     val expenses = budgets.filter { it.category != "Income" }
 
-    // Calculate the remaining budget
+
     val remainingBudget = totalBudget
 
-    // Prepare the data for the pie chart
+
     val pieChartData = expenses.map { it.amount.toFloat() } + remainingBudget.toFloat()
     val pieChartLabels = expenses.map { it.category } + "Left"
     val pieChartColors = listOf(
@@ -67,10 +67,10 @@ fun BudgetPageContent(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header
+
         HeaderSection(navController = navController)
 
-        // PieChart
+
         PieChart(
             data = pieChartData,
             colors = pieChartColors,
@@ -81,7 +81,7 @@ fun BudgetPageContent(
                 .width(250.dp)
         )
 
-        // Income Row
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,7 +101,8 @@ fun BudgetPageContent(
                 text = "Income: $income $",
                 color = Color.White,
                 fontSize = 18.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
             )
             IconButton(onClick = onIncomeIncrease) {
                 Icon(
@@ -112,7 +113,7 @@ fun BudgetPageContent(
             }
         }
 
-        // Expense Rows
+
         expenses.forEach { budget ->
             Row(
                 modifier = Modifier
@@ -132,7 +133,8 @@ fun BudgetPageContent(
                 Text(
                     text = "${budget.category}: ${budget.amount} $",
                     fontSize = 16.sp,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = { onIncrease(budget.category) }) {
                     Icon(
@@ -146,7 +148,7 @@ fun BudgetPageContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Total Left
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,14 +164,16 @@ fun BudgetPageContent(
             )
         }
 
-        // Reset Button
+
         Button(
             onClick = onReset,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp)
+                .padding(top = 8.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF227C9D))
+
         ) {
-            Text("Reset Budgets")
+            Text("Reset Budgets",fontWeight = FontWeight.Bold)
         }
     }
 }

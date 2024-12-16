@@ -14,7 +14,7 @@ class BudgetViewModel(private val repository: BudgetRepository) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            repository.ensureDefaultBudget() // Ensure the default budget exists
+            repository.ensureDefaultBudget()
             loadBudgets()
         }
     }
@@ -23,7 +23,7 @@ class BudgetViewModel(private val repository: BudgetRepository) : ViewModel() {
         val budgetList = repository.getAllBudgets()
         _budgets.value = budgetList
 
-        // Calculate "Left" as Income - Sum of All Expenses
+
         val income = budgetList.find { it.category == "Income" }?.amount ?: 0
         val expenses = budgetList.filter { it.category != "Income" }.sumOf { it.amount }
         _totalBudget.value = income - expenses
@@ -50,26 +50,26 @@ class BudgetViewModel(private val repository: BudgetRepository) : ViewModel() {
     }
 
     private suspend fun updateIncome(amountChange: Int) {
-        val budgetList = repository.getAllBudgets() // Always fetch the latest data
+        val budgetList = repository.getAllBudgets()
         val incomeBudget = budgetList.find { it.category == "Income" }
         if (incomeBudget != null) {
             val updatedIncome = incomeBudget.copy(amount = incomeBudget.amount + amountChange)
-            repository.insertBudget(updatedIncome) // Persist updated income
+            repository.insertBudget(updatedIncome)
         } else {
-            // Add Income if it does not exist
+
             repository.insertBudget(Budget(category = "Income", amount = amountChange))
         }
-        loadBudgets() // Reload to reflect changes
+        loadBudgets()
     }
 
     private suspend fun updateBudget(category: String, amountChange: Int) {
-        val budgetList = repository.getAllBudgets() // Always fetch the latest data
+        val budgetList = repository.getAllBudgets()
         val budgetToUpdate = budgetList.find { it.category == category }
         if (budgetToUpdate != null) {
             val updatedBudget = budgetToUpdate.copy(amount = budgetToUpdate.amount + amountChange)
-            repository.insertBudget(updatedBudget) // Persist updated budget
+            repository.insertBudget(updatedBudget)
         }
-        loadBudgets() // Reload to reflect changes
+        loadBudgets()
     }
 
     fun resetBudgets() {

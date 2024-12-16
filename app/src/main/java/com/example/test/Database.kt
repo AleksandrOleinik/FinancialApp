@@ -25,7 +25,7 @@ interface ExpenseDao {
     suspend fun getAllExpenses(): List<Expense>
 
     @Query("DELETE FROM expenses WHERE id = :expenseId")
-    suspend fun deleteExpense(expenseId: Int): Int // Return the number of rows deleted
+    suspend fun deleteExpense(expenseId: Int): Int
 }
 
 @Dao
@@ -86,8 +86,8 @@ class Converters {
     }
 }
 @Database(
-    entities = [Expense::class, Income::class, Budget::class, Investment::class], // Added Investment
-    version = 3, // Incremented version to reflect the schema change
+    entities = [Expense::class, Income::class, Budget::class, Investment::class],
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -95,7 +95,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun incomeDao(): IncomeDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun budgetDao(): BudgetDao
-    abstract fun investmentDao(): InvestmentDao // Added DAO for investments
+    abstract fun investmentDao(): InvestmentDao
 
     companion object {
         @Volatile
@@ -108,8 +108,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "financial_database"
                 )
-                    .fallbackToDestructiveMigration() // Automatically handle migration
-                    .addCallback(PrepopulateCallback(context)) // Prepopulate data
+                    .fallbackToDestructiveMigration()
+                    .addCallback(PrepopulateCallback(context))
                     .build()
                 INSTANCE = instance
                 instance
@@ -121,11 +121,11 @@ abstract class AppDatabase : RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             CoroutineScope(Dispatchers.IO).launch {
-                // Initialize the database with default data
+
                 getInstance(context).budgetDao().insertBudget(
                     Budget(category = "Default", amount = 1000)
                 )
-                // Add more prepopulation logic if needed
+
             }
         }
     }

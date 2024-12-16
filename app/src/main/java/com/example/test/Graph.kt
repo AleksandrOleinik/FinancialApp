@@ -60,6 +60,7 @@ fun LineChartScreen(
                 setDrawFilled(true)
                 fillColor = lineColor
                 mode = LineDataSet.Mode.LINEAR
+                setDrawValues(false)
             }
 
 

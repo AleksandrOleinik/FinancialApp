@@ -10,7 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun StyledItem(
@@ -21,9 +23,9 @@ fun StyledItem(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .border(width = 2.dp, color = Color.Black, shape = MaterialTheme.shapes.extraLarge),
+            .height(45.dp)
+            .width(300.dp),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
@@ -35,18 +37,23 @@ fun StyledItem(
         ) {
             Text(
                 text = "$Date: $curr $amount",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyMedium
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
             )
 
-            // Delete Button
-            IconButton(onClick = onDelete) {
+
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Image(
-                    painter = painterResource(id = R.drawable.minus), // Add your minus.png in drawable
+                    painter = painterResource(id = R.drawable.minus),
                     contentDescription = "Delete",
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
     }
 }
+

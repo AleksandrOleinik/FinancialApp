@@ -29,7 +29,7 @@ class BudgetRepository(private val budgetDao: BudgetDao) {
     suspend fun ensureDefaultBudget() {
         withContext(Dispatchers.IO) {
             if (budgetDao.getAllBudgets().isEmpty()) {
-                // Add Income and Expense categories
+
                 budgetDao.insertBudget(Budget(category = "Income", amount = 5000))
                 budgetDao.insertBudget(Budget(category = "Housing", amount = 1000))
                 budgetDao.insertBudget(Budget(category = "Food", amount = 1000))
@@ -43,7 +43,7 @@ class BudgetRepository(private val budgetDao: BudgetDao) {
     suspend fun resetBudgets() {
         withContext(Dispatchers.IO) {
             budgetDao.resetBudgets()
-            ensureDefaultBudget() // Reset includes adding defaults
+            ensureDefaultBudget()
         }
     }
 }

@@ -24,14 +24,14 @@ class IncomeViewModel(private val repository: IncomeRepository) : ViewModel() {
     fun addIncome(income: Income) {
         viewModelScope.launch {
             repository.addIncome(income)
-            loadIncomes() // Reload incomes after adding a new one
+            loadIncomes()
         }
     }
 
     fun deleteIncome(incomeId: Int) {
         viewModelScope.launch {
             repository.deleteIncome(incomeId)
-            loadIncomes() // Reload incomes after deletion
+            loadIncomes()
         }
     }
 }

@@ -35,7 +35,7 @@ fun ExportCsvButton(context: Context, database: AppDatabase) {
             exportStatus = ExportStatus.Loading
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val file = exportAllTablesToCsv(context, database) // Returns the file
+                    val file = exportAllTablesToCsv(context, database)
                     exportStatus = ExportStatus.Success(file)
                 } catch (e: Exception) {
                     exportStatus = ExportStatus.Failure(e.message ?: "Unknown error")
@@ -44,17 +44,19 @@ fun ExportCsvButton(context: Context, database: AppDatabase) {
         },
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .border(width = 2.dp, color = Color.Black, shape = MaterialTheme.shapes.extraLarge),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4A261))
+
+            .height(80.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF227C9D))
     ) {
         Text(
             text = "Export CSV",
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
+            fontSize = 32.sp,
+            modifier = Modifier.padding(10.dp)
         )
     }
+
 
     when (exportStatus) {
         is ExportStatus.Loading -> Text("Exporting...", modifier = Modifier.padding(top = 16.dp))
@@ -71,7 +73,7 @@ fun ExportCsvButton(context: Context, database: AppDatabase) {
             }
         }
         is ExportStatus.Failure -> Text("Export Failed: ${(exportStatus as ExportStatus.Failure).error}", modifier = Modifier.padding(top = 16.dp))
-        else -> {} // Do nothing for Idle state
+        else -> {}
     }
 }
 
@@ -97,31 +99,31 @@ suspend fun exportAllTablesToCsv(context: Context, database: AppDatabase): File 
         val incomes = database.incomeDao().getAllIncomes()
         val expenses = database.expenseDao().getAllExpenses()
         val budgets = database.budgetDao().getAllBudgets()
-        val investments = database.investmentDao().getAllInvestments().first() // Fetch Flow data
+        val investments = database.investmentDao().getAllInvestments().first()
 
-        // Generate CSV content
+
         val writer = FileWriter(file)
         writer.append("Category,Type,Amount,Additional Info\n")
 
-        // Write Incomes
+
         writer.append("Income\n")
         incomes.forEach {
             writer.append("${it.id},Income,${it.amount},Date:${it.date}\n")
         }
 
-        // Write Expenses
+
         writer.append("Expenses\n")
         expenses.forEach {
             writer.append("${it.id},Expense,${it.amount},Date:${it.date}\n")
         }
 
-        // Write Budgets
+
         writer.append("Budgets\n")
         budgets.forEach {
             writer.append("${it.id},Budget,${it.amount},${it.category}\n")
         }
 
-        // Write Investments
+
         writer.append("Investments\n")
         investments.forEach {
             writer.append("${it.id},Investment,${it.amount},${it.ticker} at ${it.boughtAt}\n")
@@ -141,13 +143,13 @@ fun shareCsvFile(context: Context, file: File) {
 
     val emailIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/csv"
-        putExtra(Intent.EXTRA_EMAIL, arrayOf("")) // Pre-fill recipient (optional)
+        putExtra(Intent.EXTRA_EMAIL, arrayOf(""))
         putExtra(Intent.EXTRA_SUBJECT, "Exported Financial Data")
         putExtra(Intent.EXTRA_TEXT, "Please find the exported CSV file attached.")
         putExtra(Intent.EXTRA_STREAM, uri)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant temporary access to the file
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    // Launch the email app
+
     context.startActivity(Intent.createChooser(emailIntent, "Send CSV via Email"))
 }
